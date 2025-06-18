@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: electricity_price_prediction
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ML Service
+  ml-service:
+    build: ./ml_service
+    container_name: ml-service
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ml_service:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  # Backend Spring Boot Service
+  backend:
+    build: ./backend
+    container_name: backend-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - ml-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/electricity_price_prediction?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - ML_SERVICE_URL=http://ml-service:5000
+
+  # Frontend service
+  frontend:
+    build: ./frontend
+    container_name: frontend-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080/api
+      - REACT_APP_ML_SERVICE_URL=http://localhost:5000
+
+volumes:
+  mysql-data: 

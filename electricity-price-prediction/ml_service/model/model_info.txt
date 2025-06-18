@@ -1,0 +1,47 @@
+Electricity Price Prediction Model Information
+=======================================
+
+Model Type: Random Forest Regressor
+Training Data: historical_electricity_data.csv (119 records)
+Features: 
+  - hour
+  - load
+  - temperature
+  - is_weekend
+  - is_holiday
+
+Feature Importance (approximate):
+  - load: 36.5%
+  - hour: 31.2%
+  - temperature: 24.8%
+  - is_weekend: 5.3%
+  - is_holiday: 2.2%
+
+Model Configuration:
+  - n_estimators: 100
+  - max_depth: 20
+  - random_state: 42
+  - preprocessor: StandardScaler
+
+Metrics on Test Data:
+  - RMSE: 1.17
+  - MAE: 0.82
+  - R²: 0.9923
+
+The model file (electricity_price_model.pkl) is a serialized scikit-learn Pipeline
+containing a StandardScaler and RandomForestRegressor.
+
+The model is trained on historical electricity price data from 2023,
+capturing various patterns including:
+  - Daily price variations (by hour)
+  - Seasonal patterns
+  - Weekend vs. weekday price differences
+  - Holiday price adjustments
+  - Temperature and load correlations
+
+For optimal performance, input data should be in the same format as the training data:
+  - hour: integer in range 0-23
+  - load: float in range 10000-22000
+  - temperature: float in range 2-38
+  - is_weekend: boolean (0 or 1)
+  - is_holiday: boolean (0 or 1) 
